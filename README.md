@@ -6,7 +6,7 @@
 
 # 📌 배포 URL
 
-- https://honcours-solo-adventures-planner.lovable.app/
+- [혼코스 - 혼자서도 하루가 꽉 찬 나만의 AI 코스 메이커](https://honcours-solo-adventures-planner.lovable.app/)
 
 # 📌 페르소나
 
