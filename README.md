@@ -1,73 +1,92 @@
-# Welcome to your Lovable project
+# 📌 서비스 개요
 
-## Project info
+- 서비스명: **혼코스(Honcours)** - 혼자서도 하루가 꽉 찬 나만의 플랜을 자동으로 구성해주는 AI 코스 메이커
+- 메인기능: 사용자의 기분, 피로도, 활동 욕구에 따라 장소 기반으로 혼자노는 코스 추천
+- 부가기능: 오프라인 모드 & 다운로드 코스, 리워드 & 포인트 제도, SNS 공유 & 디지털 스탬프
 
-**URL**: https://lovable.dev/projects/d8991b3c-9b38-4303-8805-9fd563c7b1a4
+# 📌 배포 URL
 
-## How can I edit this code?
+- https://honcours-solo-adventures-planner.lovable.app/
 
-There are several ways of editing your application.
+# 📌 페르소나
 
-**Use Lovable**
+- **혼행 입문자 – 정다은 (26세)**
+  - **직업**: 대학원생 (미술 전공)
+  - **라이프스타일**:
+    - 평일: 수업과 과제 중심, 주말: 친구들과 카페·전시 관람
+    - 최근: 혼자만의 시간을 갖고 싶어 함
+  - **목표**:
+    - 처음으로 온전한 ‘나만의 하루’를 경험
+  - **니즈**:
+    - 초보자를 위한 친절한 코스 가이드와 구체적 설명
+    - 붐비지 않고 잔잔한 분위기의 장소
+  - **페인 포인트**:
+    - 어디서부터 시작해야 할지 몰라 망설임
+    - 너무 붐비거나 어색한 공간에 대한 불안
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d8991b3c-9b38-4303-8805-9fd563c7b1a4) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+# 📌 사용자 시나리오
 
-**Use your preferred IDE**
+- **상황**  
+  정다은은 주말에 혼자 하루를 보내기로 결심하고, ‘혼코스’ 앱을 발견해 설치한다.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **스토리 흐름**
+  1. 앱 첫 실행 → 온보딩에서 “혼행이 처음이에요” 선택
+  2. ‘입문 코스 추천’ (전시 → 북카페 → 영화) 카드 3개 표시
+  3. 각 카드에서 분위기 사진·혼잡도·간단 리뷰 확인
+  4. “이대로 출발할래요” 탭 → 오늘 일정 저장
+  5. 도착 시 푸시 알림으로 장소별 팁 제공
+  6. 하루 마친 뒤 후기 작성 (“처음 혼행, 생각보다 좋았어요”)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+# 📌 인수 조건 (Acceptance Criteria)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- **Given** 앱 최초 실행 시  
+  **When** “혼행이 처음이에요”를 선택하면  
+  **Then** 3초 이내에 `GET /courses/recommend?mode=novice` 호출 후 카드 3개 렌더링
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- **Given** 추천 카드가 보이는 상태에서  
+  **When** “이대로 출발할래요” 버튼 탭 시  
+  **Then** `POST /users/{userId}/courses` 호출, “플랜이 저장되었습니다” 알림 표시
 
-# Step 3: Install the necessary dependencies.
-npm i
+- **Given** 코스 저장 후  
+  **When** GPS로 장소 도착이 감지되면  
+  **Then** WebSocket 또는 Local Notification으로 안내 메시지·팁 1회 노출
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+- **Given** 코스 완료 후  
+  **When** 후기 작성 화면 진입 시  
+  **Then** `POST /courses/{courseId}/reviews` 인터페이스 제공, 평점·코멘트 입력 가능
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+# 📌 핵심 가치 제안 (Value Proposition)
 
-**Use GitHub Codespaces**
+- **첫 혼행의 불안 해소**: 검증된 입문 코스로 안심
+- **원클릭 일정 완성**: 복잡한 검색 없이 즉시 코스 확정
+- **세심한 동행감**: 실시간 알림·팁으로 안전한 여정
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+# 📌 핵심 기능 (Core Features)
 
-This project is built with:
+1. **온보딩 – 입문 모드** (`‘혼행이 처음이에요’` 토글)
+2. **입문 코스 추천**
+   - API: `GET /courses/recommend?mode=novice`
+   - 3단계 코스 카드(이미지·혼잡도·리뷰)
+3. **플랜 저장 & 알림**
+   - API: `POST /users/{userId}/courses`
+   - 출발 전·도착 시 푸시 알림, 장소 팁
+4. **위치 기반 안내** (GPS 체크인 → WebSocket/Local Notification)
+5. **후기 작성** (API: `POST /courses/{courseId}/reviews`)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+# 📌 구현 범위 (MVP Scope)
 
-Simply open [Lovable](https://lovable.dev/projects/d8991b3c-9b38-4303-8805-9fd563c7b1a4) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- 목업 데이터로 단일 입문 코스 추천 & 저장 플로우 구현
+- 온보딩, 추천 화면, 플랜 상세 화면 UI
+- 푸시/인앱 알림 샘플 동작 (실제 연동 제외)
+- 모의 GPS 좌표로 도착 체크 시뮬레이션
+- 후기 입력 폼 및 제출 버튼 UI
