@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Navigation, Clock, CheckCircle, Camera, Coffee, Film } from 'lucide-react';
+import { MapPin, Navigation, Clock, CheckCircle, Camera, Coffee, Film, Home, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface LocationGuideProps {
@@ -61,6 +60,18 @@ export const LocationGuide = ({ course, currentLocation, onLocationUpdate }: Loc
     }
   };
 
+  const handleGoHome = () => {
+    // Reset onboarding and go back to start
+    localStorage.removeItem('honcours-onboarding');
+    window.location.reload();
+  };
+
+  const handleGoBack = () => {
+    if (currentLocation > 0) {
+      onLocationUpdate(currentLocation - 1);
+    }
+  };
+
   if (!currentLocationData) {
     return null;
   }
@@ -68,14 +79,36 @@ export const LocationGuide = ({ course, currentLocation, onLocationUpdate }: Loc
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
       <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-6 pt-4">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">혼코스 진행중</h1>
-          <div className="flex items-center justify-center space-x-2">
-            <Badge variant="outline" className="text-sm">
-              {currentLocation + 1} / {course.locations.length}
-            </Badge>
-            <span className="text-gray-600">• {course.title}</span>
+        <div className="flex items-center justify-between mb-6 pt-4">
+          <div className="flex items-center space-x-4">
+            {currentLocation > 0 && (
+              <Button 
+                onClick={handleGoBack}
+                variant="outline" 
+                size="icon"
+                className="rounded-full"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+            )}
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-800 mb-2">혼코스 진행중</h1>
+              <div className="flex items-center justify-center space-x-2">
+                <Badge variant="outline" className="text-sm">
+                  {currentLocation + 1} / {course.locations.length}
+                </Badge>
+                <span className="text-gray-600">• {course.title}</span>
+              </div>
+            </div>
           </div>
+          <Button 
+            onClick={handleGoHome}
+            variant="outline" 
+            size="icon"
+            className="rounded-full"
+          >
+            <Home className="w-4 h-4" />
+          </Button>
         </div>
 
         {/* Progress Bar */}

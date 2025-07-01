@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, MapPin, Star, Users } from 'lucide-react';
+import { Clock, MapPin, Star, Users, Home } from 'lucide-react';
 import { mockCourses } from '@/lib/mockData';
 
 interface CourseRecommendationProps {
@@ -32,6 +31,12 @@ export const CourseRecommendation = ({ isNovice, onCourseSelect }: CourseRecomme
     fetchCourses();
   }, [isNovice]);
 
+  const handleGoHome = () => {
+    // Reset onboarding and go back to start
+    localStorage.removeItem('honcours-onboarding');
+    window.location.reload();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -46,10 +51,21 @@ export const CourseRecommendation = ({ isNovice, onCourseSelect }: CourseRecomme
   return (
     <div className="min-h-screen p-4">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8 pt-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+        <div className="flex items-center justify-between mb-6 pt-4">
+          <h1 className="text-3xl font-bold text-gray-800">
             {isNovice ? '혼행 입문 코스' : '추천 코스'}
           </h1>
+          <Button 
+            onClick={handleGoHome}
+            variant="outline" 
+            size="icon"
+            className="rounded-full"
+          >
+            <Home className="w-4 h-4" />
+          </Button>
+        </div>
+        
+        <div className="text-center mb-8">
           <p className="text-gray-600">
             {isNovice 
               ? '처음 혼자 떠나는 여행을 위한 검증된 코스예요' 

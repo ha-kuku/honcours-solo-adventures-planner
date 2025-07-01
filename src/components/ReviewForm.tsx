@@ -1,9 +1,8 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Star, Heart, Camera } from 'lucide-react';
+import { Star, Heart, Camera, Home } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ReviewFormProps {
@@ -50,10 +49,27 @@ export const ReviewForm = ({ course, onComplete }: ReviewFormProps) => {
     }
   };
 
+  const handleGoHome = () => {
+    // Reset onboarding and go back to start
+    localStorage.removeItem('honcours-onboarding');
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
       <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8 pt-8">
+        <div className="flex justify-end pt-4 mb-4">
+          <Button 
+            onClick={handleGoHome}
+            variant="outline" 
+            size="icon"
+            className="rounded-full"
+          >
+            <Home className="w-4 h-4" />
+          </Button>
+        </div>
+        
+        <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <Heart className="w-8 h-8 text-white" />
           </div>

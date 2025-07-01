@@ -1,8 +1,7 @@
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Clock, MapPin, Star, Users, Camera, Coffee, Film } from 'lucide-react';
+import { ArrowLeft, Clock, MapPin, Star, Users, Camera, Coffee, Film, Home } from 'lucide-react';
 
 interface CourseDetailProps {
   course: any;
@@ -35,19 +34,35 @@ export const CourseDetail = ({ course, onStartPlan, onBack }: CourseDetailProps)
     onStartPlan();
   };
 
+  const handleGoHome = () => {
+    // Reset onboarding and go back to start
+    localStorage.removeItem('honcours-onboarding');
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen p-4">
       <div className="max-w-2xl mx-auto">
-        <div className="flex items-center space-x-4 mb-6 pt-4">
+        <div className="flex items-center justify-between mb-6 pt-4">
+          <div className="flex items-center space-x-4">
+            <Button 
+              onClick={onBack}
+              variant="outline" 
+              size="icon"
+              className="rounded-full"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <h1 className="text-2xl font-bold text-gray-800">코스 상세</h1>
+          </div>
           <Button 
-            onClick={onBack}
+            onClick={handleGoHome}
             variant="outline" 
             size="icon"
             className="rounded-full"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <Home className="w-4 h-4" />
           </Button>
-          <h1 className="text-2xl font-bold text-gray-800">코스 상세</h1>
         </div>
 
         <div className="space-y-6">
