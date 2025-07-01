@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, MapPin, Star, Users, Home } from 'lucide-react';
+import { Clock, MapPin, Star, Users, Home, Gift } from 'lucide-react';
 import { mockCourses } from '@/lib/mockData';
 
 interface CourseRecommendationProps {
   isNovice: boolean;
   onCourseSelect: (course: any) => void;
+  onShowRewards: () => void;
+  userPoints: { available: number };
 }
 
-export const CourseRecommendation = ({ isNovice, onCourseSelect }: CourseRecommendationProps) => {
+export const CourseRecommendation = ({ isNovice, onCourseSelect, onShowRewards, userPoints }: CourseRecommendationProps) => {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,14 +57,24 @@ export const CourseRecommendation = ({ isNovice, onCourseSelect }: CourseRecomme
           <h1 className="text-3xl font-bold text-gray-800">
             {isNovice ? '혼행 입문 코스' : '추천 코스'}
           </h1>
-          <Button 
-            onClick={handleGoHome}
-            variant="outline" 
-            size="icon"
-            className="rounded-full"
-          >
-            <Home className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Button 
+              onClick={onShowRewards}
+              variant="outline"
+              className="flex items-center space-x-2"
+            >
+              <Gift className="w-4 h-4" />
+              <span>{userPoints.available}P</span>
+            </Button>
+            <Button 
+              onClick={handleGoHome}
+              variant="outline" 
+              size="icon"
+              className="rounded-full"
+            >
+              <Home className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
         
         <div className="text-center mb-8">

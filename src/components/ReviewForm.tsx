@@ -38,10 +38,15 @@ export const ReviewForm = ({ course, onComplete }: ReviewFormProps) => {
     
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Show points and badge earned
       toast.success('후기가 등록되었습니다!', {
-        description: '다른 혼행러들에게 도움이 될 거예요'
+        description: '100 포인트와 새로운 배지를 획득했어요! 🎉'
       });
-      onComplete();
+      
+      setTimeout(() => {
+        onComplete();
+      }, 1000);
     } catch (error) {
       toast.error('후기 등록에 실패했습니다');
     } finally {
