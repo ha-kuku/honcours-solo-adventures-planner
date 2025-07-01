@@ -69,7 +69,13 @@ const Index = () => {
       courseTitle: selectedCourse.title,
       completedAt: new Date().toISOString(),
       locations: selectedCourse.locations.map((loc: any) => loc.name),
-      badges: newBadges.map(badgeId => ({ id: badgeId, name: '전시 애호가', description: '전시회를 방문했어요', icon: '🎨' })),
+      badges: newBadges.map(badgeId => ({ 
+        id: badgeId, 
+        name: '전시 애호가', 
+        description: '전시회를 방문했어요', 
+        icon: '🎨',
+        category: 'location' as const
+      })),
       totalPoints: pointsEarned
     });
     
