@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Onboarding } from '@/components/Onboarding';
 import { CourseRecommendation } from '@/components/CourseRecommendation';
@@ -7,9 +6,12 @@ import { ReviewForm } from '@/components/ReviewForm';
 import { LocationGuide } from '@/components/LocationGuide';
 import { RewardsPanel } from '@/components/RewardsPanel';
 import { ShareCard } from '@/components/ShareCard';
+import { MyPage } from '@/components/MyPage';
+import { CourseCreator } from '@/components/CourseCreator';
 import { UserPoints, ShareCard as ShareCardType } from '@/types/rewards';
+import { MyPageData, UserCourse } from '@/types/location';
 
-export type AppState = 'onboarding' | 'recommendation' | 'course-detail' | 'active-plan' | 'review' | 'rewards' | 'share';
+export type AppState = 'onboarding' | 'recommendation' | 'course-detail' | 'active-plan' | 'review' | 'rewards' | 'share' | 'mypage' | 'create-course';
 export type UserMode = 'novice' | 'experienced' | 'home';
 
 const Index = () => {
@@ -20,6 +22,22 @@ const Index = () => {
   const [userPoints, setUserPoints] = useState<UserPoints>({ total: 1500, available: 1200, earned: 1500 });
   const [userBadges, setUserBadges] = useState<string[]>(['first-solo', 'cafe-hopper']);
   const [shareData, setShareData] = useState<ShareCardType | null>(null);
+  const [myPageData, setMyPageData] = useState<MyPageData>({
+    completedCourses: [
+      {
+        id: 'completed-1',
+        title: '홍대 감성 카페 투어',
+        completedAt: '2024-01-15T14:30:00Z',
+        rating: 4.5,
+        image: '/placeholder.svg',
+        locations: ['카페 A', '카페 B', '카페 C']
+      }
+    ],
+    createdCourses: [],
+    totalPoints: 1500,
+    badges: ['first-solo', 'cafe-hopper'],
+    favoriteLocations: ['홍대', '성수', '강남']
+  });
 
   useEffect(() => {
     // Check if user has completed onboarding
@@ -58,7 +76,7 @@ const Index = () => {
   const handleReviewComplete = () => {
     // Award points and badges for completing course
     const pointsEarned = 100;
-    const newBadges = userMode === 'home' ? ['home-master'] : ['exhibition-lover']; // Different badge for home courses
+    const newBadges = userMode === 'home' ? ['home-master'] : ['exhibition-lover'];
     
     setUserPoints(prev => ({
       ...prev,
@@ -68,6 +86,23 @@ const Index = () => {
     }));
     
     setUserBadges(prev => [...prev, ...newBadges.filter(badge => !prev.includes(badge))]);
+    
+    // Add to completed courses
+    const completedCourse = {
+      id: selectedCourse.id,
+      title: selectedCourse.title,
+      completedAt: new Date().toISOString(),
+      rating: 5, // Default rating, should be from review form
+      image: selectedCourse.image,
+      locations: selectedCourse.locations.map((loc: any) => loc.name)
+    };
+    
+    setMyPageData(prev => ({
+      ...prev,
+      completedCourses: [...prev.completedCourses, completedCourse],
+      totalPoints: prev.totalPoints + pointsEarned,
+      badges: [...prev.badges, ...newBadges.filter(badge => !prev.badges.includes(badge))]
+    }));
     
     // Prepare share data
     setShareData({
@@ -91,6 +126,22 @@ const Index = () => {
     setCurrentState('rewards');
   };
 
+  const handleShowMyPage = () => {
+    setCurrentState('mypage');
+  };
+
+  const handleCreateCourse = () => {
+    setCurrentState('create-course');
+  };
+
+  const handleCourseCreated = (course: UserCourse) => {
+    setMyPageData(prev => ({
+      ...prev,
+      createdCourses: [...prev.createdCourses, course]
+    }));
+    setCurrentState('mypage');
+  };
+
   const handleBackToRecommendation = () => {
     setCurrentState('recommendation');
     setSelectedCourse(null);
@@ -109,6 +160,7 @@ const Index = () => {
           userMode={userMode}
           onCourseSelect={handleCourseSelect}
           onShowRewards={handleShowRewards}
+          onShowMyPage={handleShowMyPage}
           userPoints={userPoints}
         />
       )}
@@ -148,6 +200,21 @@ const Index = () => {
         <ShareCard 
           shareData={shareData}
           onBack={handleBackToRecommendation}
+        />
+      )}
+      
+      {currentState === 'mypage' && (
+        <MyPage 
+          myPageData={myPageData}
+          onBack={handleBackToRecommendation}
+          onCreateCourse={handleCreateCourse}
+        />
+      )}
+      
+      {currentState === 'create-course' && (
+        <CourseCreator 
+          onBack={() => setCurrentState('mypage')}
+          onCourseCreated={handleCourseCreated}
         />
       )}
     </div>

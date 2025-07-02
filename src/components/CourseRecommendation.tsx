@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, MapPin, Star, Users, Home, Gift } from 'lucide-react';
+import { Clock, MapPin, Star, Users, Home, Gift, User } from 'lucide-react';
 import { mockCourses } from '@/lib/mockData';
 import { UserMode } from '@/pages/Index';
 
@@ -11,10 +10,17 @@ interface CourseRecommendationProps {
   userMode: UserMode;
   onCourseSelect: (course: any) => void;
   onShowRewards: () => void;
+  onShowMyPage: () => void;
   userPoints: { available: number };
 }
 
-export const CourseRecommendation = ({ userMode, onCourseSelect, onShowRewards, userPoints }: CourseRecommendationProps) => {
+export const CourseRecommendation = ({ 
+  userMode, 
+  onCourseSelect, 
+  onShowRewards, 
+  onShowMyPage, 
+  userPoints 
+}: CourseRecommendationProps) => {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -95,6 +101,14 @@ export const CourseRecommendation = ({ userMode, onCourseSelect, onShowRewards, 
             >
               <Gift className="w-4 h-4" />
               <span>{userPoints.available}P</span>
+            </Button>
+            <Button 
+              onClick={onShowMyPage}
+              variant="outline" 
+              size="icon"
+              className="rounded-full"
+            >
+              <User className="w-4 h-4" />
             </Button>
             <Button 
               onClick={handleGoHome}
