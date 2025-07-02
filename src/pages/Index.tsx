@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Onboarding } from '@/components/Onboarding';
 import { MoodCheck, MoodResult } from '@/components/MoodCheck';
@@ -58,7 +59,15 @@ const Index = () => {
     setUserMode(mode);
     localStorage.setItem('honcours-onboarding', 'true');
     localStorage.setItem('honcours-user-mode', mode);
-    setCurrentState('mood-check');
+    
+    // 온보딩에서 이미 기분 체크가 완료된 경우 바로 추천으로
+    const savedMoodResult = localStorage.getItem('honcours-mood-result');
+    if (savedMoodResult) {
+      setMoodResult(JSON.parse(savedMoodResult));
+      setCurrentState('recommendation');
+    } else {
+      setCurrentState('mood-check');
+    }
   };
 
   const handleMoodCheckComplete = (result: MoodResult) => {
@@ -210,6 +219,9 @@ const Index = () => {
         <ShareCard 
           shareData={shareData}
           onBack={handleBackToRecommendation}
+          onShowRewards={handleShowRewards}
+          onShowMyPage={handleShowMyPage}
+          userPoints={userPoints}
         />
       )}
       
