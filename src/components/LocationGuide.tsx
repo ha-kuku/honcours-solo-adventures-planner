@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Clock, Navigation, CheckCircle, Users, AlertTriangle } from 'lucide-react';
 import { AlternativeLocation } from '@/components/AlternativeLocation';
+import { MapIntegration } from '@/components/MapIntegration';
 import { LocationInfo } from '@/types/location';
 
 interface LocationGuideProps {
@@ -135,6 +135,16 @@ export const LocationGuide = ({ course, currentLocation, onLocationUpdate }: Loc
                 <Users className="w-4 h-4" />
                 <span>영업시간: {currentLocationData.hours}</span>
               </div>
+            </div>
+
+            {/* Map Integration */}
+            <div className="mb-4">
+              <MapIntegration 
+                locationName={currentLocationData.name}
+                address={currentLocationData.address || '서울시 마포구 홍익로 123'}
+                latitude={37.5665 + Math.random() * 0.1}
+                longitude={126.9780 + Math.random() * 0.1}
+              />
             </div>
 
             {/* Warning for high congestion */}

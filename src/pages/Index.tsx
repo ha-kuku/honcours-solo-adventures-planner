@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Onboarding } from '@/components/Onboarding';
 import { MoodCheck, MoodResult } from '@/components/MoodCheck';
@@ -25,6 +24,7 @@ const Index = () => {
   const [userPoints, setUserPoints] = useState<UserPoints>({ total: 3500, available: 3200, earned: 3500 });
   const [userBadges, setUserBadges] = useState<string[]>(['first-solo', 'cafe-hopper']);
   const [shareData, setShareData] = useState<ShareCardType | null>(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [myPageData, setMyPageData] = useState<MyPageData>({
     completedCourses: [
       {
@@ -43,16 +43,25 @@ const Index = () => {
   });
 
   useEffect(() => {
-    // Check if user has completed onboarding
-    const hasCompletedOnboarding = localStorage.getItem('honcours-onboarding');
-    const savedUserMode = localStorage.getItem('honcours-user-mode') as UserMode;
-    const savedMoodResult = localStorage.getItem('honcours-mood-result');
+    // Simulate initial loading
+    const initializeApp = async () => {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Check if user has completed onboarding
+      const hasCompletedOnboarding = localStorage.getItem('honcours-onboarding');
+      const savedUserMode = localStorage.getItem('honcours-user-mode') as UserMode;
+      const savedMoodResult = localStorage.getItem('honcours-mood-result');
+      
+      if (hasCompletedOnboarding && savedUserMode && savedMoodResult) {
+        setUserMode(savedUserMode);
+        setMoodResult(JSON.parse(savedMoodResult));
+        setCurrentState('recommendation');
+      }
+      
+      setIsInitialLoading(false);
+    };
     
-    if (hasCompletedOnboarding && savedUserMode && savedMoodResult) {
-      setUserMode(savedUserMode);
-      setMoodResult(JSON.parse(savedMoodResult));
-      setCurrentState('recommendation');
-    }
+    initializeApp();
   }, []);
 
   const handleOnboardingComplete = (mode: UserMode) => {
@@ -163,6 +172,19 @@ const Index = () => {
     setShareData(null);
   };
 
+  // Show loading spinner during initial load
+  if (isInitialLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mx-auto"></div>
+          <p className="text-lg font-medium text-gray-700">혼코스 준비 중...</p>
+          <p className="text-sm text-gray-500">당신만을 위한 특별한 코스를 찾고 있어요</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
       {currentState === 'onboarding' && (
@@ -189,6 +211,9 @@ const Index = () => {
           course={selectedCourse}
           onStartPlan={handlePlanStart}
           onBack={() => setCurrentState('recommendation')}
+          onShowRewards={handleShowRewards}
+          onShowMyPage={handleShowMyPage}
+          userPoints={userPoints}
         />
       )}
       

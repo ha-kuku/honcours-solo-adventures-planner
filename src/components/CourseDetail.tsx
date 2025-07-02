@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Clock, MapPin, Star, Users, Camera, Coffee, Film, Home, Info } from 'lucide-react';
+import { ArrowLeft, Clock, MapPin, Star, Users, Camera, Coffee, Film, Home, Info, Gift, User } from 'lucide-react';
 import { LocationInfoModal } from '@/components/LocationInfoModal';
 import { TipsPanel } from '@/components/TipsPanel';
 import { SimilarCourses } from '@/components/SimilarCourses';
@@ -12,9 +12,12 @@ interface CourseDetailProps {
   course: any;
   onStartPlan: () => void;
   onBack: () => void;
+  onShowRewards: () => void;
+  onShowMyPage: () => void;
+  userPoints: { available: number };
 }
 
-export const CourseDetail = ({ course, onStartPlan, onBack }: CourseDetailProps) => {
+export const CourseDetail = ({ course, onStartPlan, onBack, onShowRewards, onShowMyPage, userPoints }: CourseDetailProps) => {
   const [selectedLocation, setSelectedLocation] = useState<LocationInfo | null>(null);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
@@ -82,14 +85,35 @@ export const CourseDetail = ({ course, onStartPlan, onBack }: CourseDetailProps)
             </Button>
             <h1 className="text-2xl font-bold text-gray-800">코스 상세</h1>
           </div>
-          <Button 
-            onClick={handleGoHome}
-            variant="outline" 
-            size="icon"
-            className="rounded-full"
-          >
-            <Home className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Button 
+              onClick={onShowRewards}
+              variant="outline"
+              className="flex items-center space-x-2"
+            >
+              <Gift className="w-4 h-4" />
+              <span>{userPoints.available}P</span>
+              {userPoints.available >= 3000 && (
+                <Badge className="bg-yellow-500 text-white ml-1">카페이용가능</Badge>
+              )}
+            </Button>
+            <Button 
+              onClick={onShowMyPage}
+              variant="outline" 
+              size="icon"
+              className="rounded-full"
+            >
+              <User className="w-4 h-4" />
+            </Button>
+            <Button 
+              onClick={handleGoHome}
+              variant="outline" 
+              size="icon"
+              className="rounded-full"
+            >
+              <Home className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
