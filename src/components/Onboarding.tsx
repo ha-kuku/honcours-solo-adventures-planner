@@ -2,18 +2,18 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart, MapPin, Users } from 'lucide-react';
+import { Heart, MapPin, Users, Home } from 'lucide-react';
 
 interface OnboardingProps {
-  onComplete: (isNovice: boolean) => void;
+  onComplete: (mode: 'novice' | 'experienced' | 'home') => void;
 }
 
 export const Onboarding = ({ onComplete }: OnboardingProps) => {
-  const [isNovice, setIsNovice] = useState<boolean | null>(null);
+  const [selectedMode, setSelectedMode] = useState<'novice' | 'experienced' | 'home' | null>(null);
 
   const handleContinue = () => {
-    if (isNovice !== null) {
-      onComplete(isNovice);
+    if (selectedMode !== null) {
+      onComplete(selectedMode);
     }
   };
 
@@ -36,9 +36,9 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
         <div className="space-y-4">
           <Card 
             className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-              isNovice === true ? 'ring-2 ring-purple-500 bg-purple-50' : ''
+              selectedMode === 'novice' ? 'ring-2 ring-purple-500 bg-purple-50' : ''
             }`}
-            onClick={() => setIsNovice(true)}
+            onClick={() => setSelectedMode('novice')}
           >
             <CardContent className="p-6 flex items-center space-x-4">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
@@ -53,9 +53,9 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
 
           <Card 
             className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-              isNovice === false ? 'ring-2 ring-purple-500 bg-purple-50' : ''
+              selectedMode === 'experienced' ? 'ring-2 ring-purple-500 bg-purple-50' : ''
             }`}
-            onClick={() => setIsNovice(false)}
+            onClick={() => setSelectedMode('experienced')}
           >
             <CardContent className="p-6 flex items-center space-x-4">
               <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-full flex items-center justify-center">
@@ -67,11 +67,28 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
               </div>
             </CardContent>
           </Card>
+
+          <Card 
+            className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+              selectedMode === 'home' ? 'ring-2 ring-purple-500 bg-purple-50' : ''
+            }`}
+            onClick={() => setSelectedMode('home')}
+          >
+            <CardContent className="p-6 flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-teal-400 rounded-full flex items-center justify-center">
+                <Home className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-800">집에서 쉬고 싶어요</h3>
+                <p className="text-sm text-gray-600">편안한 집콕 활동을 추천받아보세요</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <Button 
           onClick={handleContinue}
-          disabled={isNovice === null}
+          disabled={selectedMode === null}
           className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium text-lg rounded-xl"
         >
           시작하기

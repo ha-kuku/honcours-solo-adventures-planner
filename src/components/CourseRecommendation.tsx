@@ -1,18 +1,20 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, MapPin, Star, Users, Home, Gift } from 'lucide-react';
 import { mockCourses } from '@/lib/mockData';
+import { UserMode } from '@/pages/Index';
 
 interface CourseRecommendationProps {
-  isNovice: boolean;
+  userMode: UserMode;
   onCourseSelect: (course: any) => void;
   onShowRewards: () => void;
   userPoints: { available: number };
 }
 
-export const CourseRecommendation = ({ isNovice, onCourseSelect, onShowRewards, userPoints }: CourseRecommendationProps) => {
+export const CourseRecommendation = ({ userMode, onCourseSelect, onShowRewards, userPoints }: CourseRecommendationProps) => {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,21 +24,49 @@ export const CourseRecommendation = ({ isNovice, onCourseSelect, onShowRewards, 
       setLoading(true);
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const filteredCourses = isNovice 
-        ? mockCourses.filter(course => course.difficulty === 'beginner')
-        : mockCourses;
+      let filteredCourses;
+      if (userMode === 'novice') {
+        filteredCourses = mockCourses.filter(course => course.difficulty === 'beginner' && course.type === 'outdoor');
+      } else if (userMode === 'home') {
+        filteredCourses = mockCourses.filter(course => course.type === 'home');
+      } else {
+        filteredCourses = mockCourses.filter(course => course.type === 'outdoor');
+      }
       
       setCourses(filteredCourses);
       setLoading(false);
     };
 
     fetchCourses();
-  }, [isNovice]);
+  }, [userMode]);
 
   const handleGoHome = () => {
     // Reset onboarding and go back to start
     localStorage.removeItem('honcours-onboarding');
+    localStorage.removeItem('honcours-user-mode');
     window.location.reload();
+  };
+
+  const getTitle = () => {
+    switch (userMode) {
+      case 'novice':
+        return '혼행 입문 코스';
+      case 'home':
+        return '집콕 힐링 코스';
+      default:
+        return '추천 코스';
+    }
+  };
+
+  const getDescription = () => {
+    switch (userMode) {
+      case 'novice':
+        return '처음 혼자 떠나는 여행을 위한 검증된 코스예요';
+      case 'home':
+        return '집에서 편안하게 즐길 수 있는 알찬 활동들이에요';
+      default:
+        return '당신만을 위한 특별한 하루를 만들어보세요';
+    }
   };
 
   if (loading) {
@@ -55,7 +85,7 @@ export const CourseRecommendation = ({ isNovice, onCourseSelect, onShowRewards, 
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6 pt-4">
           <h1 className="text-3xl font-bold text-gray-800">
-            {isNovice ? '혼행 입문 코스' : '추천 코스'}
+            {getTitle()}
           </h1>
           <div className="flex items-center space-x-2">
             <Button 
@@ -79,10 +109,7 @@ export const CourseRecommendation = ({ isNovice, onCourseSelect, onShowRewards, 
         
         <div className="text-center mb-8">
           <p className="text-gray-600">
-            {isNovice 
-              ? '처음 혼자 떠나는 여행을 위한 검증된 코스예요' 
-              : '당신만을 위한 특별한 하루를 만들어보세요'
-            }
+            {getDescription()}
           </p>
         </div>
 
@@ -97,10 +124,12 @@ export const CourseRecommendation = ({ isNovice, onCourseSelect, onShowRewards, 
                 />
                 <div className="absolute top-4 left-4">
                   <Badge className={`${
+                    course.type === 'home' ? 'bg-green-500' :
                     course.congestionLevel === 'low' ? 'bg-green-500' :
                     course.congestionLevel === 'medium' ? 'bg-yellow-500' : 'bg-red-500'
                   } text-white`}>
-                    {course.congestionLevel === 'low' ? '한산함' :
+                    {course.type === 'home' ? '집콕' :
+                     course.congestionLevel === 'low' ? '한산함' :
                      course.congestionLevel === 'medium' ? '보통' : '붐빔'}
                   </Badge>
                 </div>

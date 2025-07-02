@@ -1,4 +1,3 @@
-
 export const mockCourses = [
   {
     id: 1,
@@ -10,6 +9,7 @@ export const mockCourses = [
     rating: 4.8,
     reviewCount: 124,
     congestionLevel: "low",
+    type: "outdoor",
     locations: [
       {
         id: 1,
@@ -65,6 +65,7 @@ export const mockCourses = [
     rating: 4.6,
     reviewCount: 89,
     congestionLevel: "low",
+    type: "outdoor",
     locations: [
       {
         id: 4,
@@ -120,6 +121,7 @@ export const mockCourses = [
     rating: 4.7,
     reviewCount: 156,
     congestionLevel: "medium",
+    type: "outdoor",
     locations: [
       {
         id: 7,
@@ -163,6 +165,174 @@ export const mockCourses = [
       "서점에서는 관심 분야 책을 미리 정해두면 좋아요",
       "전통찻집에서는 스마트폰을 내려두고 여유를 즐겨보세요",
       "인사동 거리 구경도 함께 해보세요"
+    ]
+  },
+  {
+    id: 4,
+    title: "넷플릭스 & 홈 카페",
+    description: "집에서 즐기는 완벽한 영화 마라톤과 홈메이드 음료",
+    image: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=800&h=400&fit=crop",
+    duration: "4시간",
+    difficulty: "beginner",
+    rating: 4.9,
+    reviewCount: 203,
+    congestionLevel: "none",
+    type: "home",
+    locations: [
+      {
+        id: 10,
+        name: "거실 영화관 세팅",
+        type: "movie_setup",
+        description: "편안한 소파와 조명으로 홈시네마 분위기 만들기",
+        time: "19:00 - 19:30",
+        duration: "30분",
+        congestion: "없음",
+        tip: "조명을 어둡게 하고 담요를 준비하세요. 스마트폰은 무음으로!",
+        arrivalTip: "팝콘이나 간단한 간식을 미리 준비해두세요",
+        image: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=400&h=300&fit=crop"
+      },
+      {
+        id: 11,
+        name: "넷플릭스 추천작 감상",
+        type: "streaming",
+        description: "화제의 드라마나 영화 2-3편 연속 시청",
+        time: "19:30 - 22:00",
+        duration: "2.5시간",
+        congestion: "없음",
+        tip: "장르를 미리 정해두세요. 로맨스, 스릴러, 다큐 중에서 골라보세요!",
+        arrivalTip: "시청 목록을 미리 만들어두면 선택 시간을 줄일 수 있어요",
+        image: "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=400&h=300&fit=crop"
+      },
+      {
+        id: 12,
+        name: "홈메이드 음료 타임",
+        type: "drink_making",
+        description: "따뜻한 코코아나 허브티로 마무리",
+        time: "22:00 - 22:30",
+        duration: "30분",
+        congestion: "없음",
+        tip: "카모마일이나 라벤더차는 숙면에 도움이 돼요. 꿀을 조금 넣어보세요!",
+        arrivalTip: "차를 우리는 동안 오늘 본 영화에 대해 생각해보세요",
+        image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop"
+      }
+    ],
+    tips: [
+      "편안한 잠옷으로 갈아입고 시작하세요",
+      "중간중간 스트레칭을 해서 몸이 굳지 않게 해주세요",
+      "눈의 피로를 위해 화면 밝기를 적절히 조절하세요",
+      "다음 날 일이 있다면 너무 늦지 않게 마무리하세요"
+    ]
+  },
+  {
+    id: 5,
+    title: "홈 요가 & 명상",
+    description: "집에서 하는 몸과 마음의 힐링 타임",
+    image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=400&fit=crop",
+    duration: "3시간",
+    difficulty: "beginner",
+    rating: 4.7,
+    reviewCount: 167,
+    congestionLevel: "none",
+    type: "home",
+    locations: [
+      {
+        id: 13,
+        name: "요가 매트 준비",
+        type: "preparation",
+        description: "조용한 공간에 요가 매트와 소품 세팅",
+        time: "18:00 - 18:15",
+        duration: "15분",
+        congestion: "없음",
+        tip: "방을 환기시키고 차분한 음악을 틀어두세요",
+        arrivalTip: "휴대폰은 무음으로 하고 물을 준비해두세요",
+        image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=300&fit=crop"
+      },
+      {
+        id: 14,
+        name: "기본 요가 루틴",
+        type: "yoga_practice",
+        description: "초보자를 위한 30분 요가 동작",
+        time: "18:15 - 19:00",
+        duration: "45분",
+        congestion: "없음",
+        tip: "무리하지 말고 자신의 페이스대로 따라해보세요",
+        arrivalTip: "YouTube 요가 채널을 미리 찾아두면 좋아요",
+        image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=300&fit=crop"
+      },
+      {
+        id: 15,
+        name: "명상과 휴식",
+        type: "meditation",
+        description: "10분간의 명상으로 하루 마무리",
+        time: "19:00 - 19:30",
+        duration: "30분",
+        congestion: "없음",
+        tip: "편안한 자세로 호흡에만 집중해보세요",
+        arrivalTip: "명상 앱이나 백색소음을 활용해보세요",
+        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop"
+      }
+    ],
+    tips: [
+      "요가복이 없어도 편한 옷이면 충분해요",
+      "처음엔 쉬운 동작부터 시작하세요",
+      "호흡을 깊게 하는 것이 가장 중요해요",
+      "매일 조금씩이라도 꾸준히 하는 것이 좋아요"
+    ]
+  },
+  {
+    id: 6,
+    title: "보드게임 & 퍼즐",
+    description: "혼자서도 즐거운 보드게임과 직소퍼즐",
+    image: "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=800&h=400&fit=crop",
+    duration: "5시간",
+    difficulty: "beginner",
+    rating: 4.5,
+    reviewCount: 98,
+    congestionLevel: "none",
+    type: "home",
+    locations: [
+      {
+        id: 16,
+        name: "1인용 보드게임",
+        type: "board_game",
+        description: "솔로 플레이 가능한 보드게임 즐기기",
+        time: "14:00 - 16:00",
+        duration: "2시간",
+        congestion: "없음",
+        tip: "온라인으로도 다양한 보드게임을 즐길 수 있어요",
+        arrivalTip: "게임 규칙을 미리 읽어두면 더 재미있어요",
+        image: "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=400&h=300&fit=crop"
+      },
+      {
+        id: 17,
+        name: "직소퍼즐 도전",
+        type: "puzzle",
+        description: "500-1000피스 퍼즐로 집중력 키우기",
+        time: "16:30 - 19:00",
+        duration: "2.5시간",
+        congestion: "없음",
+        tip: "모서리부터 맞춰나가면 쉬워요. 충분한 공간을 확보하세요!",
+        arrivalTip: "좋은 조명 아래서 하는 것이 눈에 편해요",
+        image: "https://images.unsplash.com/photo-1580913428706-c311e67898b3?w=400&h=300&fit=crop"
+      },
+      {
+        id: 18,
+        name: "간단한 간식 타임",
+        type: "snack_time",
+        description: "게임하며 즐길 수 있는 간단한 간식 준비",
+        time: "19:00 - 19:30",
+        duration: "30분",
+        congestion: "없음",
+        tip: "손에 묻지 않는 간식이 좋아요. 견과류나 과일 추천!",
+        arrivalTip: "게임 중에는 음료수보다 물이 안전해요",
+        image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=300&fit=crop"
+      }
+    ],
+    tips: [
+      "혼자 할 수 있는 게임 목록을 미리 만들어두세요",
+      "퍼즐은 완성하는 데 시간이 오래 걸리니 여유를 가지세요",
+      "게임 중간중간 스트레칭을 잊지 마세요",
+      "완성한 퍼즐은 사진으로 남기면 뿌듯해요"
     ]
   }
 ];

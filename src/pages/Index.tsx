@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Onboarding } from '@/components/Onboarding';
 import { CourseRecommendation } from '@/components/CourseRecommendation';
@@ -9,11 +10,12 @@ import { ShareCard } from '@/components/ShareCard';
 import { UserPoints, ShareCard as ShareCardType } from '@/types/rewards';
 
 export type AppState = 'onboarding' | 'recommendation' | 'course-detail' | 'active-plan' | 'review' | 'rewards' | 'share';
+export type UserMode = 'novice' | 'experienced' | 'home';
 
 const Index = () => {
   const [currentState, setCurrentState] = useState<AppState>('onboarding');
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
-  const [isNovice, setIsNovice] = useState(false);
+  const [userMode, setUserMode] = useState<UserMode>('novice');
   const [currentLocation, setCurrentLocation] = useState(0);
   const [userPoints, setUserPoints] = useState<UserPoints>({ total: 1500, available: 1200, earned: 1500 });
   const [userBadges, setUserBadges] = useState<string[]>(['first-solo', 'cafe-hopper']);
@@ -22,14 +24,17 @@ const Index = () => {
   useEffect(() => {
     // Check if user has completed onboarding
     const hasCompletedOnboarding = localStorage.getItem('honcours-onboarding');
-    if (hasCompletedOnboarding) {
+    const savedUserMode = localStorage.getItem('honcours-user-mode') as UserMode;
+    if (hasCompletedOnboarding && savedUserMode) {
+      setUserMode(savedUserMode);
       setCurrentState('recommendation');
     }
   }, []);
 
-  const handleOnboardingComplete = (noviceMode: boolean) => {
-    setIsNovice(noviceMode);
+  const handleOnboardingComplete = (mode: UserMode) => {
+    setUserMode(mode);
     localStorage.setItem('honcours-onboarding', 'true');
+    localStorage.setItem('honcours-user-mode', mode);
     setCurrentState('recommendation');
   };
 
@@ -53,7 +58,7 @@ const Index = () => {
   const handleReviewComplete = () => {
     // Award points and badges for completing course
     const pointsEarned = 100;
-    const newBadges = ['exhibition-lover']; // Example new badge
+    const newBadges = userMode === 'home' ? ['home-master'] : ['exhibition-lover']; // Different badge for home courses
     
     setUserPoints(prev => ({
       ...prev,
@@ -71,10 +76,10 @@ const Index = () => {
       locations: selectedCourse.locations.map((loc: any) => loc.name),
       badges: newBadges.map(badgeId => ({ 
         id: badgeId, 
-        name: '전시 애호가', 
-        description: '전시회를 방문했어요', 
-        icon: '🎨',
-        category: 'location' as const
+        name: userMode === 'home' ? '집콕 마스터' : '전시 애호가', 
+        description: userMode === 'home' ? '집에서 알찬 시간을 보냈어요' : '전시회를 방문했어요', 
+        icon: userMode === 'home' ? '🏠' : '🎨',
+        category: 'achievement' as const
       })),
       totalPoints: pointsEarned
     });
@@ -101,7 +106,7 @@ const Index = () => {
       
       {currentState === 'recommendation' && (
         <CourseRecommendation 
-          isNovice={isNovice}
+          userMode={userMode}
           onCourseSelect={handleCourseSelect}
           onShowRewards={handleShowRewards}
           userPoints={userPoints}
