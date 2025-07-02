@@ -1,224 +1,203 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Navigation, Clock, CheckCircle, Camera, Coffee, Film, Home, ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner';
+import { MapPin, Clock, Navigation, CheckCircle, Users, AlertTriangle } from 'lucide-react';
+import { AlternativeLocation } from '@/components/AlternativeLocation';
+import { LocationInfo } from '@/types/location';
 
 interface LocationGuideProps {
   course: any;
   currentLocation: number;
-  onLocationUpdate: (locationIndex: number) => void;
+  onLocationUpdate: (index: number) => void;
 }
 
 export const LocationGuide = ({ course, currentLocation, onLocationUpdate }: LocationGuideProps) => {
-  const [arrivedAt, setArrivedAt] = useState<number[]>([]);
-  
-  const currentLocationData = course.locations[currentLocation];
-  const isLastLocation = currentLocation === course.locations.length - 1;
+  const [showAlternatives, setShowAlternatives] = useState(false);
+  const [currentLocationData, setCurrentLocationData] = useState<LocationInfo>(course.locations[currentLocation]);
+  const [alternativeLocations, setAlternativeLocations] = useState<LocationInfo[]>([]);
 
   useEffect(() => {
-    // Simulate GPS arrival detection
-    const checkArrival = () => {
-      if (currentLocationData && !arrivedAt.includes(currentLocation)) {
-        // Simulate arrival after 3 seconds
-        setTimeout(() => {
-          setArrivedAt(prev => [...prev, currentLocation]);
-          toast.success(`${currentLocationData.name}에 도착했습니다!`, {
-            description: currentLocationData.arrivalTip,
-            duration: 5000
-          });
-        }, 3000);
-      }
-    };
-
-    checkArrival();
-  }, [currentLocation, currentLocationData, arrivedAt]);
-
-  const getLocationIcon = (type: string) => {
-    switch (type) {
-      case 'exhibition': return <Camera className="w-5 h-5" />;
-      case 'cafe': return <Coffee className="w-5 h-5" />;
-      case 'cinema': return <Film className="w-5 h-5" />;
-      default: return <MapPin className="w-5 h-5" />;
+    // Check congestion level and show alternatives if needed
+    const location = course.locations[currentLocation];
+    setCurrentLocationData(location);
+    
+    // Simulate congestion check - randomly show alternatives for high congestion
+    if (location.congestion === 'high' || Math.random() > 0.7) {
+      // Generate mock alternative locations
+      const alternatives = [
+        {
+          ...location,
+          id: location.id + '_alt1',
+          name: location.name + ' 대안 1',
+          description: '비슷한 분위기의 다른 장소',
+          congestion: 'low',
+          address: location.address + ' 근처'
+        },
+        {
+          ...location,
+          id: location.id + '_alt2', 
+          name: location.name + ' 대안 2',
+          description: '조금 더 한적한 곳',
+          congestion: 'medium',
+          address: location.address + ' 인근'
+        }
+      ];
+      setAlternativeLocations(alternatives);
+      
+      // Show alternatives modal after a delay
+      setTimeout(() => {
+        setShowAlternatives(true);
+      }, 2000);
     }
+  }, [currentLocation, course.locations]);
+
+  const handleLocationChange = (newLocation: LocationInfo) => {
+    setCurrentLocationData(newLocation);
+    setShowAlternatives(false);
+    // Update the course data with new location
+    course.locations[currentLocation] = newLocation;
+  };
+
+  const handleKeepOriginal = () => {
+    setShowAlternatives(false);
   };
 
   const handleNextLocation = () => {
-    if (isLastLocation) {
-      onLocationUpdate(currentLocation + 1);
-    } else {
-      onLocationUpdate(currentLocation + 1);
+    onLocationUpdate(currentLocation + 1);
+  };
+
+  const handleCompleteLocation = () => {
+    onLocationUpdate(currentLocation + 1);
+  };
+
+  const getCongestionColor = (level: string) => {
+    switch (level) {
+      case 'low': return 'bg-green-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'high': return 'bg-red-500';
+      default: return 'bg-gray-500';
     }
   };
 
-  const handleLocationArrival = (locationIndex: number) => {
-    // Simulate manual check-in
-    if (!arrivedAt.includes(locationIndex)) {
-      setArrivedAt(prev => [...prev, locationIndex]);
-      toast.success(`${course.locations[locationIndex].name}에 체크인했습니다!`);
+  const getCongestionText = (level: string) => {
+    switch (level) {
+      case 'low': return '한산함';
+      case 'medium': return '보통';
+      case 'high': return '붐빔';
+      default: return '정보없음';
     }
   };
-
-  const handleGoHome = () => {
-    // Reset onboarding and go back to start
-    localStorage.removeItem('honcours-onboarding');
-    window.location.reload();
-  };
-
-  const handleGoBack = () => {
-    if (currentLocation > 0) {
-      onLocationUpdate(currentLocation - 1);
-    }
-  };
-
-  if (!currentLocationData) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
       <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-6 pt-4">
-          <div className="flex items-center space-x-4">
-            {currentLocation > 0 && (
-              <Button 
-                onClick={handleGoBack}
-                variant="outline" 
-                size="icon"
-                className="rounded-full"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-            )}
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-800 mb-2">혼코스 진행중</h1>
-              <div className="flex items-center justify-center space-x-2">
-                <Badge variant="outline" className="text-sm">
-                  {currentLocation + 1} / {course.locations.length}
-                </Badge>
-                <span className="text-gray-600">• {course.title}</span>
-              </div>
-            </div>
-          </div>
-          <Button 
-            onClick={handleGoHome}
-            variant="outline" 
-            size="icon"
-            className="rounded-full"
-          >
-            <Home className="w-4 h-4" />
-          </Button>
-        </div>
-
         {/* Progress Bar */}
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            {course.locations.map((location: any, index: number) => (
-              <div key={location.id} className="flex flex-col items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  index <= currentLocation 
-                    ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white' 
-                    : 'bg-gray-200 text-gray-400'
-                }`}>
-                  {arrivedAt.includes(index) ? (
-                    <CheckCircle className="w-4 h-4" />
-                  ) : (
-                    getLocationIcon(location.type)
-                  )}
-                </div>
-                {index < course.locations.length - 1 && (
-                  <div className={`h-0.5 w-16 mt-4 ${
-                    index < currentLocation ? 'bg-purple-300' : 'bg-gray-200'
-                  }`} />
-                )}
-              </div>
-            ))}
+            <h2 className="text-lg font-semibold text-gray-800">진행 상황</h2>
+            <span className="text-sm text-gray-600">
+              {currentLocation + 1} / {course.locations.length}
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${((currentLocation + 1) / course.locations.length) * 100}%` }}
+            />
           </div>
         </div>
 
         {/* Current Location Card */}
-        <Card className="mb-6 overflow-hidden shadow-lg">
-          <div className="relative">
-            <img 
-              src={currentLocationData.image || course.image} 
-              alt={currentLocationData.name}
-              className="w-full h-48 object-cover"
-            />
-            <div className="absolute top-4 right-4">
-              <Badge className="bg-purple-500 text-white">
-                현재 위치
-              </Badge>
-            </div>
-          </div>
-          
+        <Card className="mb-6">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-800">{currentLocationData.name}</h2>
-              <div className="flex items-center space-x-1 text-sm text-gray-600">
+              <CardTitle className="text-xl">{currentLocationData.name}</CardTitle>
+              <Badge className={`${getCongestionColor(currentLocationData.congestion)} text-white`}>
+                {getCongestionText(currentLocationData.congestion)}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600 mb-4">{currentLocationData.description}</p>
+            
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <MapPin className="w-4 h-4" />
+                <span>{currentLocationData.address}</span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <Clock className="w-4 h-4" />
-                <span>{currentLocationData.time}</span>
+                <span>예상 소요시간: {currentLocationData.duration}</span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <Users className="w-4 h-4" />
+                <span>영업시간: {currentLocationData.hours}</span>
               </div>
             </div>
-            <p className="text-gray-600">{currentLocationData.description}</p>
-          </CardHeader>
-          
-          <CardContent>
-            <div className="space-y-4">
-              {currentLocationData.tip && (
-                <div className="p-4 bg-purple-50 rounded-lg">
-                  <h4 className="font-semibold text-purple-800 mb-2">💡 혼행 팁</h4>
-                  <p className="text-sm text-purple-700">{currentLocationData.tip}</p>
+
+            {/* Warning for high congestion */}
+            {currentLocationData.congestion === 'high' && (
+              <div className="flex items-center space-x-2 p-3 bg-orange-50 border border-orange-200 rounded-lg mb-4">
+                <AlertTriangle className="w-5 h-5 text-orange-500" />
+                <div>
+                  <p className="text-sm font-medium text-orange-800">혼잡도 높음</p>
+                  <p className="text-xs text-orange-600">대기시간이 길 수 있어요</p>
                 </div>
-              )}
-              
-              <div className="flex space-x-2">
-                {!arrivedAt.includes(currentLocation) && (
-                  <Button 
-                    onClick={() => handleLocationArrival(currentLocation)}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    <Navigation className="w-4 h-4 mr-2" />
-                    도착 체크인
-                  </Button>
-                )}
-                
-                <Button 
-                  onClick={handleNextLocation}
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-                  disabled={!arrivedAt.includes(currentLocation)}
-                >
-                  {isLastLocation ? '코스 완료' : '다음 장소로'}
-                </Button>
               </div>
+            )}
+
+            <div className="flex space-x-3">
+              <Button 
+                onClick={handleCompleteLocation}
+                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                완료
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={handleNextLocation}
+                className="flex-1"
+              >
+                <Navigation className="w-4 h-4 mr-2" />
+                건너뛰기
+              </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Upcoming Locations */}
-        {!isLastLocation && (
-          <Card>
-            <CardHeader>
-              <h3 className="text-lg font-semibold text-gray-800">다음 일정</h3>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {course.locations.slice(currentLocation + 1).map((location: any, index: number) => (
-                  <div key={location.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                      {getLocationIcon(location.type)}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-800">{location.name}</h4>
-                      <p className="text-sm text-gray-600">{location.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Alternative Locations Modal */}
+        {showAlternatives && (
+          <AlternativeLocation
+            originalLocation={course.locations[currentLocation]}
+            alternatives={alternativeLocations}
+            onLocationChange={handleLocationChange}
+            onKeepOriginal={handleKeepOriginal}
+          />
         )}
+
+        {/* Tips for current location */}
+        <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+          <CardHeader>
+            <CardTitle className="text-lg text-blue-800">
+              📍 {currentLocationData.name} 팁
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm text-blue-700">
+              <p>• 사진 촬영하기 좋은 스팟을 찾아보세요</p>
+              <p>• 혼자서도 편안하게 즐길 수 있는 자리를 선택하세요</p>
+              {currentLocationData.congestion === 'high' && (
+                <p>• 붐비는 시간대이니 여유롭게 즐기세요</p>
+              )}
+              {currentLocationData.type === 'cafe' && (
+                <p>• 창가 자리에서 여유로운 시간을 보내보세요</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

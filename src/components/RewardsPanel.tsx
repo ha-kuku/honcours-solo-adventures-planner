@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Gift, Star, Trophy, ArrowLeft, Home } from 'lucide-react';
+import { Gift, Star, Trophy, ArrowLeft, Home, Coffee, CheckCircle } from 'lucide-react';
 import { mockRewards, mockBadges } from '@/lib/rewardsData';
 import { UserPoints } from '@/types/rewards';
 import { toast } from 'sonner';
@@ -17,6 +17,7 @@ interface RewardsPanelProps {
 
 export const RewardsPanel = ({ userPoints, userBadges, onBack }: RewardsPanelProps) => {
   const [selectedTab, setSelectedTab] = useState('rewards');
+  const [cafeEligible, setCafeEligible] = useState(userPoints.available >= 3000);
 
   const handleRewardRedeem = (rewardId: string, pointsCost: number) => {
     if (userPoints.available < pointsCost) {
@@ -28,6 +29,14 @@ export const RewardsPanel = ({ userPoints, userBadges, onBack }: RewardsPanelPro
     toast.success('리워드가 교환되었습니다!', {
       description: '마이페이지에서 쿠폰을 확인해보세요'
     });
+  };
+
+  const handleCafePartnership = () => {
+    if (userPoints.available >= 3000) {
+      toast.success('혼코스 제휴 카페 이용권이 활성화되었습니다!', {
+        description: '전국 혼코스 제휴 카페에서 특별 할인을 받으세요'
+      });
+    }
   };
 
   const handleGoHome = () => {
@@ -75,7 +84,7 @@ export const RewardsPanel = ({ userPoints, userBadges, onBack }: RewardsPanelPro
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4 text-center">
+            <div className="grid grid-cols-2 gap-4 text-center mb-4">
               <div>
                 <p className="text-sm text-gray-600">총 획득</p>
                 <p className="text-lg font-semibold text-gray-800">{userPoints.earned}</p>
@@ -85,6 +94,29 @@ export const RewardsPanel = ({ userPoints, userBadges, onBack }: RewardsPanelPro
                 <p className="text-lg font-semibold text-purple-600">{userPoints.available}</p>
               </div>
             </div>
+            
+            {/* 카페 제휴 기능 */}
+            {cafeEligible && (
+              <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <Coffee className="w-8 h-8 text-amber-600" />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-amber-800">혼코스 제휴 카페 이용 가능!</h3>
+                      <p className="text-sm text-amber-700">3000P 이상으로 전국 제휴 카페에서 특별 혜택을 받으세요</p>
+                    </div>
+                    <Button 
+                      onClick={handleCafePartnership}
+                      size="sm"
+                      className="bg-amber-600 hover:bg-amber-700"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-1" />
+                      활성화
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </CardContent>
         </Card>
 
@@ -101,6 +133,36 @@ export const RewardsPanel = ({ userPoints, userBadges, onBack }: RewardsPanelPro
           </TabsList>
 
           <TabsContent value="rewards" className="space-y-4">
+            {/* 카페 제휴 리워드 추가 */}
+            {cafeEligible && (
+              <Card className="overflow-hidden border-amber-200">
+                <div className="flex">
+                  <div className="w-24 h-24 bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                    <Coffee className="w-12 h-12 text-white" />
+                  </div>
+                  <div className="flex-1 p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h3 className="font-semibold text-gray-800">혼코스 제휴 카페 이용권</h3>
+                        <p className="text-sm text-gray-600">전국 제휴 카페에서 20% 할인</p>
+                        <p className="text-xs text-gray-500 mt-1">혼코스 제휴점 • 30일</p>
+                      </div>
+                      <Badge className="bg-amber-500 text-white">
+                        VIP
+                      </Badge>
+                    </div>
+                    <Button 
+                      onClick={handleCafePartnership}
+                      size="sm"
+                      className="w-full bg-amber-600 hover:bg-amber-700"
+                    >
+                      제휴 혜택 받기
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            )}
+            
             {mockRewards.map((reward) => (
               <Card key={reward.id} className="overflow-hidden">
                 <div className="flex">

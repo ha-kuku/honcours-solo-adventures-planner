@@ -1,13 +1,16 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, MapPin, Star, Users, Home, Gift, User } from 'lucide-react';
+import { Clock, MapPin, Star, Users, Home, Gift, User, Battery, Moon, Sun } from 'lucide-react';
 import { mockCourses } from '@/lib/mockData';
 import { UserMode } from '@/pages/Index';
+import { MoodResult } from '@/components/MoodCheck';
 
 interface CourseRecommendationProps {
   userMode: UserMode;
+  moodResult: MoodResult;
   onCourseSelect: (course: any) => void;
   onShowRewards: () => void;
   onShowMyPage: () => void;
@@ -16,6 +19,7 @@ interface CourseRecommendationProps {
 
 export const CourseRecommendation = ({ 
   userMode, 
+  moodResult,
   onCourseSelect, 
   onShowRewards, 
   onShowMyPage, 
@@ -31,12 +35,23 @@ export const CourseRecommendation = ({
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       let filteredCourses;
-      if (userMode === 'novice') {
-        filteredCourses = mockCourses.filter(course => course.difficulty === 'beginner' && course.type === 'outdoor');
-      } else if (userMode === 'home') {
+      
+      // 기분/피로도 기반 필터링
+      if (moodResult.preference === 'indoor' || moodResult.energy === 'low') {
         filteredCourses = mockCourses.filter(course => course.type === 'home');
       } else {
-        filteredCourses = mockCourses.filter(course => course.type === 'outdoor');
+        if (userMode === 'novice') {
+          filteredCourses = mockCourses.filter(course => 
+            course.difficulty === 'beginner' && 
+            course.type === 'outdoor' &&
+            (moodResult.mood === 'calm' ? course.congestionLevel === 'low' : true)
+          );
+        } else {
+          filteredCourses = mockCourses.filter(course => 
+            course.type === 'outdoor' &&
+            (moodResult.energy === 'high' ? course.difficulty !== 'beginner' : true)
+          );
+        }
       }
       
       setCourses(filteredCourses);
@@ -44,35 +59,52 @@ export const CourseRecommendation = ({
     };
 
     fetchCourses();
-  }, [userMode]);
+  }, [userMode, moodResult]);
 
   const handleGoHome = () => {
     // Reset onboarding and go back to start
     localStorage.removeItem('honcours-onboarding');
     localStorage.removeItem('honcours-user-mode');
+    localStorage.removeItem('honcours-mood-result');
     window.location.reload();
   };
 
   const getTitle = () => {
+    if (moodResult.preference === 'indoor' || moodResult.energy === 'low') {
+      return '집콕 힐링 코스';
+    }
+    
     switch (userMode) {
       case 'novice':
         return '혼행 입문 코스';
       case 'home':
         return '집콕 힐링 코스';
       default:
-        return '추천 코스';
+        return moodResult.energy === 'high' ? '액티브 혼행 코스' : '여유로운 혼행 코스';
     }
   };
 
   const getDescription = () => {
-    switch (userMode) {
-      case 'novice':
-        return '처음 혼자 떠나는 여행을 위한 검증된 코스예요';
-      case 'home':
-        return '집에서 편안하게 즐길 수 있는 알찬 활동들이에요';
+    if (moodResult.preference === 'indoor' || moodResult.energy === 'low') {
+      return '집에서 편안하게 즐길 수 있는 알찬 활동들이에요';
+    }
+    
+    switch (moodResult.mood) {
+      case 'calm':
+        return '차분하고 평온한 하루를 위한 코스예요';
+      case 'active':
+        return '활기찬 하루를 위한 액티브한 코스예요';
+      case 'social':
+        return '사람들과 어우러지며 즐길 수 있는 코스예요';
       default:
         return '당신만을 위한 특별한 하루를 만들어보세요';
     }
+  };
+
+  const getMoodIcon = () => {
+    if (moodResult.energy === 'low') return <Battery className="w-5 h-5" />;
+    if (moodResult.mood === 'calm') return <Moon className="w-5 h-5" />;
+    return <Sun className="w-5 h-5" />;
   };
 
   if (loading) {
@@ -101,6 +133,9 @@ export const CourseRecommendation = ({
             >
               <Gift className="w-4 h-4" />
               <span>{userPoints.available}P</span>
+              {userPoints.available >= 3000 && (
+                <Badge className="bg-yellow-500 text-white ml-1">카페이용가능</Badge>
+              )}
             </Button>
             <Button 
               onClick={onShowMyPage}
@@ -121,7 +156,16 @@ export const CourseRecommendation = ({
           </div>
         </div>
         
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            {getMoodIcon()}
+            <Badge variant="outline">
+              에너지: {moodResult.energy === 'low' ? '낮음' : moodResult.energy === 'medium' ? '보통' : '높음'}
+            </Badge>
+            <Badge variant="outline">
+              기분: {moodResult.mood === 'calm' ? '차분함' : moodResult.mood === 'active' ? '활동적' : '사교적'}
+            </Badge>
+          </div>
           <p className="text-gray-600">
             {getDescription()}
           </p>
