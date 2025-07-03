@@ -117,13 +117,11 @@
 
 1. **온보딩 – 입문 모드** (`‘혼행이 처음이에요’` 토글)
 2. **입문 코스 추천**
-   - API: `GET /courses/recommend?mode=novice`
    - 3단계 코스 카드(이미지·혼잡도·리뷰)
 3. **플랜 저장 & 알림**
-   - API: `POST /users/{userId}/courses`
    - 출발 전·도착 시 푸시 알림, 장소 팁
-4. **위치 기반 안내** (GPS 체크인 → WebSocket/Local Notification)
-5. **후기 작성** (API: `POST /courses/{courseId}/reviews`)
+4. **위치 기반 안내**
+5. **후기 작성**
 
 ---
 
