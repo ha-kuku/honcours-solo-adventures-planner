@@ -41,6 +41,7 @@ const Index = () => {
     badges: ['first-solo', 'cafe-hopper'],
     favoriteLocations: ['홍대', '성수', '강남']
   });
+  const [editingCourse, setEditingCourse] = useState<any>(null);
 
   useEffect(() => {
     // Simulate initial loading
@@ -157,11 +158,33 @@ const Index = () => {
     setCurrentState('create-course');
   };
 
-  const handleCourseCreated = (course: UserCourse) => {
-    setMyPageData(prev => ({
-      ...prev,
-      createdCourses: [...prev.createdCourses, course]
-    }));
+  const handleEditCourse = (course: any) => {
+    setEditingCourse(course);
+    setCurrentState('create-course');
+  };
+
+  const handlePlayCourse = (course: any) => {
+    setSelectedCourse(course);
+    setCurrentState('course-detail');
+  };
+
+  const handleCourseCreated = (course: any) => {
+    if (editingCourse) {
+      // 기존 코스 수정
+      setMyPageData(prev => ({
+        ...prev,
+        createdCourses: prev.createdCourses.map(c => 
+          c.id === course.id ? course : c
+        )
+      }));
+    } else {
+      // 새 코스 생성
+      setMyPageData(prev => ({
+        ...prev,
+        createdCourses: [...prev.createdCourses, course]
+      }));
+    }
+    setEditingCourse(null);
     setCurrentState('mypage');
   };
 
@@ -222,6 +245,9 @@ const Index = () => {
           course={selectedCourse}
           currentLocation={currentLocation}
           onLocationUpdate={handleLocationUpdate}
+          onShowRewards={handleShowRewards}
+          onShowMyPage={handleShowMyPage}
+          userPoints={userPoints}
         />
       )}
       
@@ -255,6 +281,8 @@ const Index = () => {
           myPageData={myPageData}
           onBack={handleBackToRecommendation}
           onCreateCourse={handleCreateCourse}
+          onEditCourse={handleEditCourse}
+          onPlayCourse={handlePlayCourse}
         />
       )}
       
@@ -262,6 +290,7 @@ const Index = () => {
         <CourseCreator 
           onBack={() => setCurrentState('mypage')}
           onCourseCreated={handleCourseCreated}
+          editingCourse={editingCourse}
         />
       )}
     </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Clock, Navigation, CheckCircle, Users, AlertTriangle } from 'lucide-react';
+import { MapPin, Clock, Navigation, CheckCircle, Users, AlertTriangle, Gift, User, Home } from 'lucide-react';
 import { AlternativeLocation } from '@/components/AlternativeLocation';
 import { MapIntegration } from '@/components/MapIntegration';
 import { LocationInfo } from '@/types/location';
@@ -11,9 +11,19 @@ interface LocationGuideProps {
   course: any;
   currentLocation: number;
   onLocationUpdate: (index: number) => void;
+  onShowRewards?: () => void;
+  onShowMyPage?: () => void;
+  userPoints?: { available: number };
 }
 
-export const LocationGuide = ({ course, currentLocation, onLocationUpdate }: LocationGuideProps) => {
+export const LocationGuide = ({ 
+  course, 
+  currentLocation, 
+  onLocationUpdate, 
+  onShowRewards, 
+  onShowMyPage, 
+  userPoints 
+}: LocationGuideProps) => {
   const [showAlternatives, setShowAlternatives] = useState(false);
   const [currentLocationData, setCurrentLocationData] = useState<LocationInfo>(course.locations[currentLocation]);
   const [alternativeLocations, setAlternativeLocations] = useState<LocationInfo[]>([]);
@@ -90,9 +100,52 @@ export const LocationGuide = ({ course, currentLocation, onLocationUpdate }: Loc
     }
   };
 
+  const handleGoHome = () => {
+    localStorage.removeItem('honcours-onboarding');
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
       <div className="max-w-2xl mx-auto">
+        {/* 상단 헤더 추가 */}
+        <div className="flex items-center justify-between mb-6 pt-4">
+          <h1 className="text-xl font-bold text-gray-800">코스 진행</h1>
+          <div className="flex items-center space-x-2">
+            {onShowRewards && userPoints && (
+              <Button 
+                onClick={onShowRewards}
+                variant="outline"
+                className="flex items-center space-x-2"
+              >
+                <Gift className="w-4 h-4" />
+                <span>{userPoints.available}P</span>
+                {userPoints.available >= 3000 && (
+                  <Badge className="bg-yellow-500 text-white ml-1">카페이용가능</Badge>
+                )}
+              </Button>
+            )}
+            {onShowMyPage && (
+              <Button 
+                onClick={onShowMyPage}
+                variant="outline" 
+                size="icon"
+                className="rounded-full"
+              >
+                <User className="w-4 h-4" />
+              </Button>
+            )}
+            <Button 
+              onClick={handleGoHome}
+              variant="outline" 
+              size="icon"
+              className="rounded-full"
+            >
+              <Home className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
         {/* Progress Bar */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">

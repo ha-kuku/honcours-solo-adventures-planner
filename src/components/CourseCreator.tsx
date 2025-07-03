@@ -1,106 +1,85 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Plus, Minus, MapPin, ArrowLeft } from 'lucide-react';
-import { UserCourse, LocationInfo } from '@/types/location';
+import { ArrowLeft, Plus, X, MapPin } from 'lucide-react';
+import { UserCourse } from '@/types/location';
 import { toast } from 'sonner';
 
 interface CourseCreatorProps {
   onBack: () => void;
   onCourseCreated: (course: UserCourse) => void;
+  editingCourse?: UserCourse | null;
 }
 
-export const CourseCreator = ({ onBack, onCourseCreated }: CourseCreatorProps) => {
+export const CourseCreator = ({ onBack, onCourseCreated, editingCourse }: CourseCreatorProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState<'outdoor' | 'home'>('outdoor');
-  const [difficulty, setDifficulty] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner');
+  const [locations, setLocations] = useState<string[]>(['']);
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState('');
   const [isPublic, setIsPublic] = useState(true);
-  const [tags, setTags] = useState('');
-  const [locations, setLocations] = useState<Partial<LocationInfo>[]>([
-    {
-      name: '',
-      description: '',
-      type: 'cafe',
-      duration: '1시간',
-      address: '',
-      hours: '09:00 - 18:00'
+
+  // 수정 모드일 때 기존 데이터 로드
+  useEffect(() => {
+    if (editingCourse) {
+      setTitle(editingCourse.title);
+      setDescription(editingCourse.description);
+      setLocations(editingCourse.locations);
+      setTags(editingCourse.tags);
+      setIsPublic(editingCourse.isPublic);
     }
-  ]);
+  }, [editingCourse]);
 
   const addLocation = () => {
-    setLocations([...locations, {
-      name: '',
-      description: '',
-      type: 'cafe',
-      duration: '1시간',
-      address: '',
-      hours: '09:00 - 18:00'
-    }]);
+    setLocations([...locations, '']);
   };
 
   const removeLocation = (index: number) => {
-    if (locations.length > 1) {
-      setLocations(locations.filter((_, i) => i !== index));
+    const newLocations = [...locations];
+    newLocations.splice(index, 1);
+    setLocations(newLocations);
+  };
+
+  const updateLocation = (index: number, value: string) => {
+    const newLocations = [...locations];
+    newLocations[index] = value;
+    setLocations(newLocations);
+  };
+
+  const addTag = () => {
+    if (newTag.trim() && !tags.includes(newTag.trim())) {
+      setTags([...tags, newTag.trim()]);
+      setNewTag('');
     }
   };
 
-  const updateLocation = (index: number, field: keyof LocationInfo, value: string) => {
-    const updatedLocations = [...locations];
-    updatedLocations[index] = { ...updatedLocations[index], [field]: value };
-    setLocations(updatedLocations);
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
   const handleSubmit = () => {
-    if (!title.trim() || !description.trim()) {
-      toast.error('코스 제목과 설명을 입력해주세요');
+    if (!title.trim() || !description.trim() || locations.filter(loc => loc.trim()).length === 0) {
+      toast.error('제목, 설명, 장소를 모두 입력해주세요');
       return;
     }
 
-    if (locations.some(loc => !loc.name?.trim() || !loc.address?.trim())) {
-      toast.error('모든 장소의 이름과 주소를 입력해주세요');
-      return;
-    }
-
-    const newCourse: UserCourse = {
-      id: `user-course-${Date.now()}`,
-      title,
-      description,
-      locations: locations.map((loc, index) => ({
-        id: `location-${index}`,
-        name: loc.name || '',
-        description: loc.description || '',
-        type: loc.type || 'cafe',
-        duration: loc.duration || '1시간',
-        time: `${9 + index}:00`,
-        congestion: '보통',
-        address: loc.address || '',
-        hours: loc.hours || '09:00 - 18:00',
-        closedDays: [],
-        rating: 4.0,
-        reviewCount: 0,
-        tags: [],
-        images: ['/placeholder.svg']
-      })),
-      createdBy: 'user_123',
-      createdAt: new Date().toISOString(),
-      reviewCount: 0,
+    const courseData: UserCourse = {
+      id: editingCourse?.id || `course_${Date.now()}`,
+      title: title.trim(),
+      description: description.trim(),
+      locations: locations.filter(loc => loc.trim()),
+      tags,
       isPublic,
-      tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
-      duration: `${locations.length * 2}시간`,
-      difficulty,
-      type
+      createdAt: editingCourse?.createdAt || new Date().toISOString(),
+      reviewCount: editingCourse?.reviewCount || 0
     };
 
-    onCourseCreated(newCourse);
-    toast.success('새로운 코스가 생성되었습니다!');
+    onCourseCreated(courseData);
+    toast.success(editingCourse ? '코스가 수정되었습니다!' : '새 코스가 생성되었습니다!');
   };
 
   return (
@@ -110,178 +89,133 @@ export const CourseCreator = ({ onBack, onCourseCreated }: CourseCreatorProps) =
           <Button onClick={onBack} variant="outline" size="icon" className="rounded-full">
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <h1 className="text-2xl font-bold text-gray-800">나만의 코스 만들기</h1>
+          <h1 className="text-2xl font-bold text-gray-800">
+            {editingCourse ? '코스 수정' : '새 코스 만들기'}
+          </h1>
         </div>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>기본 정보</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="title">코스 제목</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="예: 홍대 카페 투어"
-                  className="mt-1"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="description">코스 설명</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="이 코스의 매력을 설명해주세요"
-                  className="mt-1"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="type">코스 유형</Label>
-                  <Select value={type} onValueChange={(value: 'outdoor' | 'home') => setType(value)}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="outdoor">야외 코스</SelectItem>
-                      <SelectItem value="home">집콕 코스</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="difficulty">난이도</Label>
-                  <Select value={difficulty} onValueChange={(value: 'beginner' | 'intermediate' | 'advanced') => setDifficulty(value)}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="beginner">초급</SelectItem>
-                      <SelectItem value="intermediate">중급</SelectItem>
-                      <SelectItem value="advanced">고급</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div>
-                <Label htmlFor="tags">태그 (쉼표로 구분)</Label>
-                <Input
-                  id="tags"
-                  value={tags}
-                  onChange={(e) => setTags(e.target.value)}
-                  placeholder="예: 카페, 힐링, 사진"
-                  className="mt-1"
-                />
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="public"
-                  checked={isPublic}
-                  onCheckedChange={setIsPublic}
-                />
-                <Label htmlFor="public">다른 사용자들과 공유하기</Label>
-              </div>
-            </CardContent>
-          </Card>
+          {/* 제목 */}
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700">제목</label>
+            <div className="mt-1">
+              <Input
+                type="text"
+                name="title"
+                id="title"
+                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>코스 장소</CardTitle>
-                <Button onClick={addLocation} size="sm" className="flex items-center space-x-1">
-                  <Plus className="w-4 h-4" />
-                  <span>장소 추가</span>
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          {/* 설명 */}
+          <div>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700">설명</label>
+            <div className="mt-1">
+              <Textarea
+                id="description"
+                name="description"
+                rows={3}
+                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* 장소 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">장소</label>
+            <div className="mt-1 space-y-2">
               {locations.map((location, index) => (
-                <div key={index} className="p-4 border rounded-lg space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <MapPin className="w-4 h-4 text-purple-500" />
-                      <span className="font-medium">장소 {index + 1}</span>
-                    </div>
-                    {locations.length > 1 && (
-                      <Button
-                        onClick={() => removeLocation(index)}
-                        variant="ghost"
-                        size="sm"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label>장소명</Label>
-                      <Input
-                        value={location.name || ''}
-                        onChange={(e) => updateLocation(index, 'name', e.target.value)}
-                        placeholder="장소 이름"
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label>유형</Label>
-                      <Select 
-                        value={location.type || 'cafe'} 
-                        onValueChange={(value) => updateLocation(index, 'type', value)}
-                      >
-                        <SelectTrigger className="mt-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="cafe">카페</SelectItem>
-                          <SelectItem value="restaurant">레스토랑</SelectItem>
-                          <SelectItem value="exhibition">전시회</SelectItem>
-                          <SelectItem value="park">공원</SelectItem>
-                          <SelectItem value="shopping">쇼핑</SelectItem>
-                          <SelectItem value="culture">문화시설</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label>주소</Label>
+                <div key={index} className="flex items-center space-x-2">
+                  <div className="flex-1">
                     <Input
-                      value={location.address || ''}
-                      onChange={(e) => updateLocation(index, 'address', e.target.value)}
-                      placeholder="상세 주소"
-                      className="mt-1"
+                      type="text"
+                      className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                      value={location}
+                      onChange={(e) => updateLocation(index, e.target.value)}
                     />
                   </div>
-                  
-                  <div>
-                    <Label>설명</Label>
-                    <Textarea
-                      value={location.description || ''}
-                      onChange={(e) => updateLocation(index, 'description', e.target.value)}
-                      placeholder="이 장소에 대한 설명"
-                      className="mt-1"
-                    />
-                  </div>
+                  {locations.length > 1 && (
+                    <Button
+                      onClick={() => removeLocation(index)}
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-500 hover:bg-red-50"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
               ))}
-            </CardContent>
-          </Card>
+              <Button
+                onClick={addLocation}
+                variant="outline"
+                className="w-full justify-center"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                장소 추가
+              </Button>
+            </div>
+          </div>
 
-          <div className="flex space-x-3">
-            <Button onClick={onBack} variant="outline" className="flex-1">
-              취소
-            </Button>
-            <Button onClick={handleSubmit} className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500">
-              코스 생성하기
+          {/* 태그 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">태그</label>
+            <div className="mt-1 flex items-center space-x-2">
+              <Input
+                type="text"
+                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                placeholder="새 태그"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    addTag();
+                    e.preventDefault();
+                  }
+                }}
+              />
+              <Button onClick={addTag} variant="outline">
+                추가
+              </Button>
+            </div>
+            <div className="mt-2">
+              {tags.map((tag) => (
+                <Badge
+                  key={tag}
+                  className="mr-2 mb-2 cursor-pointer"
+                  onClick={() => removeTag(tag)}
+                >
+                  {tag} <X className="w-3 h-3 ml-1" />
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* 공개 설정 */}
+          <div>
+            <div className="flex items-center justify-between">
+              <label htmlFor="public" className="block text-sm font-medium text-gray-700">
+                공개 코스로 설정
+              </label>
+              <Switch
+                id="public"
+                checked={isPublic}
+                onCheckedChange={(checked) => setIsPublic(checked)}
+              />
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              공개 코스로 설정하면 다른 사용자들도 당신의 코스를 볼 수 있습니다.
+            </p>
+          </div>
+
+          <div className="sticky bottom-4 bg-white p-4 rounded-xl shadow-lg border">
+            <Button onClick={handleSubmit} className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+              {editingCourse ? '수정 완료' : '코스 생성하기'}
             </Button>
           </div>
         </div>

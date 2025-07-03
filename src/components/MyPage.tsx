@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,15 +14,20 @@ import {
   Settings
 } from 'lucide-react';
 import { MyPageData } from '@/types/location';
+import { CourseDetailModal } from '@/components/CourseDetailModal';
 
 interface MyPageProps {
   myPageData: MyPageData;
   onBack: () => void;
   onCreateCourse: () => void;
+  onEditCourse?: (course: any) => void;
+  onPlayCourse?: (course: any) => void;
 }
 
-export const MyPage = ({ myPageData, onBack, onCreateCourse }: MyPageProps) => {
+export const MyPage = ({ myPageData, onBack, onCreateCourse, onEditCourse, onPlayCourse }: MyPageProps) => {
   const [activeTab, setActiveTab] = useState('completed');
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getBadgeIcon = (badgeId: string) => {
     switch (badgeId) {
@@ -42,6 +46,23 @@ export const MyPage = ({ myPageData, onBack, onCreateCourse }: MyPageProps) => {
       case 'exhibition-lover': return '전시 애호가';
       case 'home-master': return '홈 마스터';
       default: return '달성';
+    }
+  };
+
+  const handleCourseClick = (course: any) => {
+    setSelectedCourse(course);
+    setIsModalOpen(true);
+  };
+
+  const handleEditCourse = (course: any) => {
+    if (onEditCourse) {
+      onEditCourse(course);
+    }
+  };
+
+  const handlePlayCourse = (course: any) => {
+    if (onPlayCourse) {
+      onPlayCourse(course);
     }
   };
 
@@ -182,7 +203,11 @@ export const MyPage = ({ myPageData, onBack, onCreateCourse }: MyPageProps) => {
               </Card>
             ) : (
               myPageData.createdCourses.map((course) => (
-                <Card key={course.id} className="hover:shadow-lg transition-shadow">
+                <Card 
+                  key={course.id} 
+                  className="hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => handleCourseClick(course)}
+                >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -224,6 +249,15 @@ export const MyPage = ({ myPageData, onBack, onCreateCourse }: MyPageProps) => {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* 코스 상세 모달 */}
+        <CourseDetailModal 
+          course={selectedCourse}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onEdit={handleEditCourse}
+          onPlay={handlePlayCourse}
+        />
       </div>
     </div>
   );
