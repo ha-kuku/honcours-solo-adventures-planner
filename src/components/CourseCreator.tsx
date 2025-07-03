@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,9 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Plus, X, MapPin } from 'lucide-react';
 import { UserCourse } from '@/types/location';
 import { toast } from 'sonner';
+
+interface LocationInput {
+  name: string;
+  category: string;
+  address: string;
+}
 
 interface CourseCreatorProps {
   onBack: () => void;
@@ -15,10 +23,23 @@ interface CourseCreatorProps {
   editingCourse?: UserCourse | null;
 }
 
+const categoryOptions = [
+  { value: 'restaurant', label: '음식점' },
+  { value: 'cafe', label: '카페' },
+  { value: 'park', label: '공원' },
+  { value: 'museum', label: '박물관' },
+  { value: 'shopping', label: '쇼핑' },
+  { value: 'entertainment', label: '엔터테인먼트' },
+  { value: 'culture', label: '문화시설' },
+  { value: 'sports', label: '스포츠' },
+  { value: 'nature', label: '자연' },
+  { value: 'other', label: '기타' }
+];
+
 export const CourseCreator = ({ onBack, onCourseCreated, editingCourse }: CourseCreatorProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [locations, setLocations] = useState<string[]>(['']);
+  const [locations, setLocations] = useState<LocationInput[]>([{ name: '', category: '', address: '' }]);
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
   const [isPublic, setIsPublic] = useState(true);
@@ -28,15 +49,19 @@ export const CourseCreator = ({ onBack, onCourseCreated, editingCourse }: Course
     if (editingCourse) {
       setTitle(editingCourse.title);
       setDescription(editingCourse.description);
-      // Convert LocationInfo[] to string[] by extracting names
-      setLocations(editingCourse.locations.map(loc => typeof loc === 'string' ? loc : loc.name));
+      // Convert LocationInfo[] to LocationInput[] by extracting names and addresses
+      setLocations(editingCourse.locations.map(loc => ({
+        name: typeof loc === 'string' ? loc : loc.name,
+        category: typeof loc === 'object' ? loc.type || 'other' : 'other',
+        address: typeof loc === 'object' ? loc.address || '' : ''
+      })));
       setTags(editingCourse.tags);
       setIsPublic(editingCourse.isPublic);
     }
   }, [editingCourse]);
 
   const addLocation = () => {
-    setLocations([...locations, '']);
+    setLocations([...locations, { name: '', category: '', address: '' }]);
   };
 
   const removeLocation = (index: number) => {
@@ -45,9 +70,9 @@ export const CourseCreator = ({ onBack, onCourseCreated, editingCourse }: Course
     setLocations(newLocations);
   };
 
-  const updateLocation = (index: number, value: string) => {
+  const updateLocation = (index: number, field: keyof LocationInput, value: string) => {
     const newLocations = [...locations];
-    newLocations[index] = value;
+    newLocations[index][field] = value;
     setLocations(newLocations);
   };
 
@@ -63,21 +88,23 @@ export const CourseCreator = ({ onBack, onCourseCreated, editingCourse }: Course
   };
 
   const handleSubmit = () => {
-    if (!title.trim() || !description.trim() || locations.filter(loc => loc.trim()).length === 0) {
+    const validLocations = locations.filter(loc => loc.name.trim());
+    
+    if (!title.trim() || !description.trim() || validLocations.length === 0) {
       toast.error('제목, 설명, 장소를 모두 입력해주세요');
       return;
     }
 
-    // Convert string[] to LocationInfo[] for the course data
-    const locationInfos = locations.filter(loc => loc.trim()).map((loc, index) => ({
+    // Convert LocationInput[] to LocationInfo[] for the course data
+    const locationInfos = validLocations.map((loc, index) => ({
       id: `location_${index}`,
-      name: loc,
-      description: `${loc}에서의 즐거운 시간`,
-      type: 'general',
+      name: loc.name,
+      description: `${loc.name}에서의 즐거운 시간`,
+      type: loc.category || 'general',
       duration: '1-2시간',
       time: `${9 + index}:00`,
       congestion: 'medium',
-      address: `${loc} 주소`,
+      address: loc.address || `${loc.name} 주소`,
       hours: '09:00 - 22:00',
       closedDays: [],
       rating: 4.0,
@@ -151,28 +178,68 @@ export const CourseCreator = ({ onBack, onCourseCreated, editingCourse }: Course
           {/* 장소 */}
           <div>
             <label className="block text-sm font-medium text-gray-700">장소</label>
-            <div className="mt-1 space-y-2">
+            <div className="mt-1 space-y-4">
               {locations.map((location, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <div className="flex-1">
-                    <Input
-                      type="text"
-                      className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      value={location}
-                      onChange={(e) => updateLocation(index, e.target.value)}
-                    />
+                <Card key={index} className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-600">장소 {index + 1}</span>
+                      {locations.length > 1 && (
+                        <Button
+                          onClick={() => removeLocation(index)}
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:bg-red-50 h-8 w-8"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-3">
+                      {/* 장소명 */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">장소명</label>
+                        <Input
+                          type="text"
+                          placeholder="장소명을 입력하세요"
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md"
+                          value={location.name}
+                          onChange={(e) => updateLocation(index, 'name', e.target.value)}
+                        />
+                      </div>
+                      
+                      {/* 카테고리 */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">카테고리</label>
+                        <Select value={location.category} onValueChange={(value) => updateLocation(index, 'category', value)}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="카테고리를 선택하세요" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categoryOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {/* 위치/주소 */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">위치</label>
+                        <Input
+                          type="text"
+                          placeholder="주소나 위치를 입력하세요"
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md"
+                          value={location.address}
+                          onChange={(e) => updateLocation(index, 'address', e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  {locations.length > 1 && (
-                    <Button
-                      onClick={() => removeLocation(index)}
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:bg-red-50"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
+                </Card>
               ))}
               <Button
                 onClick={addLocation}
