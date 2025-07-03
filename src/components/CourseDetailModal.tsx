@@ -101,7 +101,9 @@ export const CourseDetailModal = ({ course, isOpen, onClose, onEdit, onPlay }: C
                       {index + 1}
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-medium text-gray-800">{location}</h4>
+                      <h4 className="font-medium text-gray-800">
+                        {typeof location === 'string' ? location : location.name}
+                      </h4>
                       <p className="text-sm text-gray-600">예상 소요시간: 1-2시간</p>
                     </div>
                   </div>

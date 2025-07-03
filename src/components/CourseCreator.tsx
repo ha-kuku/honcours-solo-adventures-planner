@@ -28,7 +28,8 @@ export const CourseCreator = ({ onBack, onCourseCreated, editingCourse }: Course
     if (editingCourse) {
       setTitle(editingCourse.title);
       setDescription(editingCourse.description);
-      setLocations(editingCourse.locations);
+      // Convert LocationInfo[] to string[] by extracting names
+      setLocations(editingCourse.locations.map(loc => typeof loc === 'string' ? loc : loc.name));
       setTags(editingCourse.tags);
       setIsPublic(editingCourse.isPublic);
     }
@@ -67,15 +68,37 @@ export const CourseCreator = ({ onBack, onCourseCreated, editingCourse }: Course
       return;
     }
 
+    // Convert string[] to LocationInfo[] for the course data
+    const locationInfos = locations.filter(loc => loc.trim()).map((loc, index) => ({
+      id: `location_${index}`,
+      name: loc,
+      description: `${loc}에서의 즐거운 시간`,
+      type: 'general',
+      duration: '1-2시간',
+      time: `${9 + index}:00`,
+      congestion: 'medium',
+      address: `${loc} 주소`,
+      hours: '09:00 - 22:00',
+      closedDays: [],
+      rating: 4.0,
+      reviewCount: 0,
+      tags: [],
+      images: []
+    }));
+
     const courseData: UserCourse = {
       id: editingCourse?.id || `course_${Date.now()}`,
       title: title.trim(),
       description: description.trim(),
-      locations: locations.filter(loc => loc.trim()),
+      locations: locationInfos,
+      createdBy: 'user',
       tags,
       isPublic,
       createdAt: editingCourse?.createdAt || new Date().toISOString(),
-      reviewCount: editingCourse?.reviewCount || 0
+      reviewCount: editingCourse?.reviewCount || 0,
+      duration: `${locationInfos.length * 1.5}시간`,
+      difficulty: 'beginner',
+      type: 'outdoor'
     };
 
     onCourseCreated(courseData);
